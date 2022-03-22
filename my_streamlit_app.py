@@ -7,57 +7,109 @@ Original file is located at
     https://colab.research.google.com/drive/1sFanrfHCObOaFG9-pL42Jhp6RR9L0fE1
 """
 
+import seaborn as sns
 import streamlit as st
 import pandas as pd
-import seaborn as sns
+import numpy as np
+import plotly.express as px
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
+import matplotlib.pyplot as plt
 
 st.title('Analyse de corrélation et de distribution de la base de données "cars"')
 
 link = "https://raw.githubusercontent.com/murpi/wilddata/master/quests/cars.csv"
 df_voiture = pd.read_csv(link)
 
+@st.cache()
+def import_data():
+    #st.write("j'importe")
+    df_voiture = pd.read_csv(link)
+    return(df_voiture)
 
-st.title("Tableau complet")
+import_data()
+#st.title("Tableau complet")
 
-df_voiture
 
 st.title("Sélection par continent")
 
-Continents = st.radio(
-     "Continent",
-     ('US', 'Euope', 'Japan'))
-
-if Continents == 'US':
-    st.write('You selected US.')
-    df_voiture[df_voiture["continent"].str.contains('US.')]
-elif Continents == 'Euope':
-    st.write('You selected Euope.')
-    df_voiture[df_voiture["continent"].str.contains('Europe.')]
-elif Continents == 'Japan':
-    st.write('You selected Japan.')
-    df_voiture[df_voiture["continent"].str.contains('Japan.')]
-else :
-    st.write('You selected None.')
-    st.write(df_voiture)
+Continents = st.multiselect( "Continent",df_voiture["continent"].unique())
+df_voiture_continent=df_voiture[df_voiture["continent"].isin(Continents)]
 
 
-"""st.title("Corrélation")
+if len(df_voiture_continent) >0 :
 
-viz_correlation = sns.heatmap(df_voiture.corr(), 
-                                center=0,
-                                cmap = sns.color_palette("vlag", as_cmap=True),annot=True
-                                )
-st.pyplot(viz_correlation.figure) 
-
-
-st.title("Corrélation cylinders/cubicinches")
-
-viz_correlation_cylinders_cubocinches = sns.scatterplot(data=df_voiture, x="cylinders", y="cubicinches", hue="continent")
-st.pyplot(viz_correlation_cylinders_cubocinches.figure) """
+    
+    st.write("Aperçu du tableau")
+    taille_df = st.number_input("Combien de ligne du tableau voulez vous faire apparaitre",min_value=0,max_value=len(df_voiture_continent))
+    if taille_df == 0 :
+        st.write("")
+    else :
+        st.write(df_voiture_continent.head(taille_df))
 
 
 
-viz_correlation_line_charts = st.line_chart(df_voiture)
-st.pyplot(viz_correlation_line_charts)
+    st.title("Corrélation : " + " ".join(Continents))
+    st.write("")
 
+    viz_correlation = sns.heatmap(df_voiture_continent.corr(), center=0,cmap = sns.color_palette("vlag", as_cmap=True),annot=True)
+    st.pyplot(viz_correlation.figure)
+
+    st.write("")
+    st.write("")
+
+
+    ax = plt.subplots(figsize = (5,5))
+
+    plt.subplot(1, 1, 1)
+
+    st.title("Corrélation cylinders/cubicinches :" + " ".join(Continents))
+
+    viz_correlation_cylinders_cubocinches = sns.scatterplot(data=df_voiture_continent, x="cylinders", y="cubicinches", hue="continent")
+    st.pyplot(viz_correlation_cylinders_cubocinches.figure) 
+    st.markdown("<h3 style='text-align: center; color: green;'>Corrélation positive entre les cylindres et la puissance .</h3>", unsafe_allow_html=True)
+    
+
+    ax = plt.subplots(figsize = (5,5))
+    plt.subplot(1, 1, 1)
+    st.write("")
+    st.write("")
+
+    st.write("")
+    viz_correlation_cylinders_cubocinches = sns.scatterplot(data=df_voiture_continent, x="hp", y="cubicinches", hue="continent")
+    st.title("Corrélation hp / cubicinches : " + " ".join(Continents))
+    st.pyplot(viz_correlation_cylinders_cubocinches.figure)
+    st.markdown("<h3 style='text-align: center; color: green;'>Corrélation positive entre les hp et les cubicinches .</h3>", unsafe_allow_html=True)
+    
+
+    ax = plt.subplots(figsize = (5,5))
+    plt.subplot(1, 1, 1)
+    st.write("")
+    st.write("")
+    st.title("Corrélation year / cubicinches : " + " ".join(Continents))
+    st.write("")
+    viz_correlation_cylinders_cubocinches = sns.scatterplot(data=df_voiture_continent, x="year", y="cubicinches", hue="continent")
+    st.pyplot(viz_correlation_cylinders_cubocinches.figure) 
+    st.markdown("<h3 style='text-align: center; color: red;'>Corrélation negative entre les années et les cubicinches .</h3>", unsafe_allow_html=True)
+    
+
+    ax = plt.subplots(figsize = (5,5))
+    plt.subplot(1, 1, 1)
+    st.write("")
+    st.write("")
+    st.title("Corrélation year / time-to-60 : " + " ".join(Continents))
+    st.write("")
+    viz_correlation_cylinders_cubocinches = sns.scatterplot(data=df_voiture_continent, x="year", y="time-to-60", hue="continent")
+    st.pyplot(viz_correlation_cylinders_cubocinches.figure) 
+
+    ax = plt.subplots(figsize = (5,5))
+    plt.subplot(1, 1, 1)
+    st.write("")
+    st.write("")
+    st.title("Corrélation year / mpg: " + " ".join(Continents))
+    st.write("")
+    viz_correlation_cylinders_cubocinches = sns.scatterplot(data=df_voiture_continent, x="cylinders", y="mpg", hue="continent")
+    st.pyplot(viz_correlation_cylinders_cubocinches.figure) 
+    st.markdown("<h3 style='text-align: center; color: red;'>Corrélation negative entre les cylinders et les mpg .</h3>", unsafe_allow_html=True)
+    
 
